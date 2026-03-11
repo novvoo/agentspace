@@ -154,6 +154,8 @@ async function doChoose() {
 
 let chatMessages = [];
 let chatPreviewOn = false;
+let chatCtxMessages = [];
+let chatSummary = "";
 
 function renderChat() {
   const wrap = document.getElementById("chatMessages");
@@ -224,6 +226,7 @@ async function sendChat() {
   if (!query) return;
 
   const file = document.getElementById("chatDocFile").files?.[0] || null;
+  const nextCtxMessages = [...chatCtxMessages, { role: "user", content: query }];
 
   setChatHint("");
   if (chatPreviewOn) setChatPreview(false);
@@ -239,9 +242,11 @@ async function sendChat() {
       const form = new FormData();
       form.append("query", query);
       form.append("file", file, file.name);
+      form.append("messages", JSON.stringify(nextCtxMessages));
+      if (chatSummary) form.append("summary", String(chatSummary || ""));
       data = await apiForm("POST", "/run", form);
     } else {
-      data = await apiJson("POST", "/run", { query });
+      data = await apiJson("POST", "/run", { query, messages: nextCtxMessages, summary: chatSummary });
     }
     const response = String(data?.response ?? "");
     const used = Array.isArray(data?.used_skills) ? data.used_skills.join(", ") : "";
@@ -249,6 +254,15 @@ async function sendChat() {
     const meta = chosen ? `chosen: ${chosen}${used ? ` · used: ${used}` : ""}` : used ? `used: ${used}` : "";
     chatMessages[assistantIndex] = { role: "assistant", text: response || "(empty)", meta };
     renderChat();
+    const returnedSummary = String(data?.summary ?? "").trim();
+    if (returnedSummary || data?.summarized) chatSummary = returnedSummary;
+    if (Array.isArray(data?.messages) && data.messages.length) {
+      chatCtxMessages = data.messages
+        .map((m) => ({ role: m?.role === "assistant" ? "assistant" : m?.role === "user" ? "user" : null, content: String(m?.content ?? m?.text ?? "") }))
+        .filter((m) => m.role && m.content);
+    } else {
+      chatCtxMessages = [...nextCtxMessages, { role: "assistant", content: response || "" }];
+    }
   } catch (e) {
     chatMessages[assistantIndex] = { role: "assistant", text: `请求失败：${e.message || e}` };
     renderChat();
@@ -257,6 +271,8 @@ async function sendChat() {
 
 function newChat() {
   chatMessages = [{ role: "assistant", text: "你好，我是 skill-router。把你的任务发给我，必要时可以附带文档。" }];
+  chatCtxMessages = [];
+  chatSummary = "";
   document.getElementById("chatInput").value = "";
   setChatPreview(false);
   const f = document.getElementById("chatDocFile");
