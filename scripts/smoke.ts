@@ -30,6 +30,11 @@ async function main() {
     expectOk(htmlResp.ok, `GET / (html) failed: ${htmlResp.status}`);
     const html = await htmlResp.text();
     expectOk(html.includes("/vendor/highlight.js/styles/github-dark.css"), "index.html missing highlight css link");
+    expectOk(html.includes('id="customHeadersBody"'), "index.html missing customHeadersBody");
+    expectOk(html.includes('id="addCustomHeader"'), "index.html missing addCustomHeader");
+    expectOk(!html.includes('id="defaultHeaders"'), "index.html should not include defaultHeaders textarea");
+    expectOk(html.includes('id="skillsBody"'), "index.html missing skillsBody");
+    expectOk(!html.includes('id="skillsOut"'), "index.html should not include skillsOut pre");
 
     const markedResp = await fetch(`${base}/vendor/marked/lib/marked.esm.js`);
     expectOk(markedResp.ok, `GET marked failed: ${markedResp.status}`);

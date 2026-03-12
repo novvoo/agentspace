@@ -87,6 +87,15 @@
       .ok { color: #81c784; }
       .err { color: #e57373; }
       .vHidden { display: none !important; }
+      .hdrTable { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--mui-divider); border-radius: 12px; overflow: hidden; }
+      .hdrTable th, .hdrTable td { padding: 8px; border-bottom: 1px solid var(--mui-divider); vertical-align: top; }
+      .hdrTable th { text-align: left; font-size: 12px; color: var(--mui-text-2); font-weight: 600; background: rgba(255, 255, 255, 0.03); }
+      .hdrTable tr:last-child td { border-bottom: 0; }
+      .hdrTable input { padding: 9px 10px; border-radius: 10px; }
+      .hdrRmBtn { width: 34px; height: 34px; padding: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; }
+      .hdrRmBtn.secondary { border-color: rgba(255, 255, 255, 0.18); }
+      .skillsTable th, .skillsTable td { padding: 6px 8px; font-size: 11px; line-height: 1.25; }
+      .skillsTable th { font-size: 11px; }
 
       .app { min-height: 100vh; display: flex; flex-direction: column; }
       .appbar {
@@ -312,6 +321,26 @@
             <label>OPENAI_BASE_URL</label>
             <input id="baseUrl" type="text" autocomplete="off" placeholder="https://api.openai.com/v1" />
           </div>
+          <div style="margin-top: 10px;">
+            <label>CUSTOM_HEADERS (optional)</label>
+            <table class="hdrTable" aria-label="custom headers">
+              <thead>
+                <tr>
+                  <th style="width: 44%;">Header</th>
+                  <th style="width: 44%;">Value</th>
+                  <th style="width: 12%;"></th>
+                </tr>
+              </thead>
+              <tbody id="customHeadersBody"></tbody>
+            </table>
+            <div class="btns" style="margin-top: 10px;">
+              <button id="addCustomHeader" class="secondary" type="button">添加 Header</button>
+            </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <label>OPENAI_SYSTEM_CONTENT (optional)</label>
+            <textarea id="systemContent" placeholder="You are a helpful assistant..." style="min-height: 80px;"></textarea>
+          </div>
           <div class="btns">
             <button id="saveCfg">保存到浏览器本地</button>
             <button id="clearCfg" class="secondary">清空本地配置</button>
@@ -325,7 +354,16 @@
           <div class="btns">
             <button id="reloadSkills" class="secondary">刷新列表</button>
           </div>
-          <pre id="skillsOut"></pre>
+          <table class="hdrTable skillsTable" aria-label="skills">
+            <thead>
+              <tr>
+                <th style="width: 26%;">Name</th>
+                <th style="width: 52%;">Description</th>
+                <th style="width: 22%;">Group</th>
+              </tr>
+            </thead>
+            <tbody id="skillsBody"></tbody>
+          </table>
         </div>
 
         <div class="section">
